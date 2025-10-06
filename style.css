@@ -1,0 +1,18 @@
+body {
+  background-color: #FFFFE0; /*Warna Kuning Cerah*/
+  font-family: Arial, sans-serif;
+  color: #191970;
+}
+.kartu-profil {
+  width: 300px;
+  margin: 50px auto; /*50 px jarak atas/bawah, auto menengahkan kiri/kanan*/
+  padding: 20 px;
+  background-color: white;
+  border-radius: 15 px; /*Membuat sudut menjadi melengkung*/
+  box-shadow: 0 4px 8px rgba(0,0,0,0.1); /*Efek bayangan*/
+  text-align: center; /*Menengahkan semua teks di dalam kartu*/
+}
+.kartu-profil img{
+  width: 150 px;
+  border-radius: 50%;
+}
