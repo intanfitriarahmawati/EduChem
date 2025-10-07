@@ -13,6 +13,7 @@ body {
   text-align: center; /*Menengahkan semua teks di dalam kartu*/
 }
 .kartu-profil img{
-  width: 10 px;
+  width: 80 px;
+  height: auto;
   border-radius: 50%;
 }
