@@ -1,0 +1,242 @@
+<!doctype html>
+<html lang="id" class="">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Kalkulator Token Listrik PLN — dengan Struk</title>
+
+  <!-- Tailwind CDN with simple config -->
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            'pln-blue': '#003277',
+            'pln-yellow': '#FFD400'
+          }
+        }
+      }
+    }
+  </script>
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Lucide icons (UMD) -->
+  <script src="https://unpkg.com/lucide@0.263.0/dist/umd/lucide.min.js"></script>
+
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body class="bg-gray-50 dark:bg-gray-900 text-gray-800 dark:text-gray-100 min-h-screen flex flex-col">
+  <header class="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
+    <div class="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between gap-4">
+      <div class="flex items-center gap-3">
+        <span class="inline-flex items-center justify-center w-10 h-10 rounded-md bg-pln-blue text-white">
+          <svg data-feather="zap" class="lucide-icon w-5 h-5"></svg>
+        </span>
+        <div>
+          <h1 class="text-lg font-semibold">Kalkulator Token Listrik PLN</h1>
+          <p class="text-sm text-gray-500 dark:text-gray-300">Hitung jumlah kWh & dapatkan struk transaksi</p>
+        </div>
+      </div>
+
+      <div class="flex items-center gap-3">
+        <button id="theme-toggle" class="p-2 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700" title="Toggle dark mode" aria-label="Toggle dark mode">
+          <svg id="theme-icon" class="lucide-icon w-5 h-5"></svg>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <main class="flex-1">
+    <section class="max-w-7xl mx-auto px-4 py-8">
+      <!-- Layout: form | result | struk (side receipt) -->
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
+        <!-- Form (col 1) -->
+        <div class="col-span-1 bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 p-6">
+          <div class="flex items-center gap-3 mb-4">
+            <svg class="lucide-icon w-6 h-6 text-pln-blue" data-feather="calculator"></svg>
+            <h2 class="text-xl font-semibold">Form Pembelian Token</h2>
+          </div>
+
+          <form id="token-form" class="space-y-4" novalidate>
+            <div>
+              <label for="meter" class="block text-sm font-medium mb-1">Nomor Meteran / ID Pelanggan</label>
+              <input id="meter" name="meter" type="text" placeholder="1234 5678 9012" required
+                class="w-full rounded-md border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-pln-blue" />
+              <p id="meter-error" class="text-red-500 text-sm mt-1 hidden" aria-live="polite"></p>
+            </div>
+
+            <div>
+              <label for="nominal" class="block text-sm font-medium mb-1">Nominal Pembelian</label>
+              <select id="nominal" name="nominal" required
+                class="w-full rounded-md border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-pln-blue">
+                <option value="">-- Pilih nominal --</option>
+                <option value="20000">Rp 20.000</option>
+                <option value="50000">Rp 50.000</option>
+                <option value="100000">Rp 100.000</option>
+                <option value="200000">Rp 200.000</option>
+                <option value="500000">Rp 500.000</option>
+                <option value="1000000">Rp 1.000.000</option>
+              </select>
+              <p id="nominal-error" class="text-red-500 text-sm mt-1 hidden" aria-live="polite"></p>
+            </div>
+
+            <div>
+              <label for="tariff" class="block text-sm font-medium mb-1">Tarif per kWh (Rp)</label>
+              <div class="flex gap-2">
+                <input id="tariff" name="tariff" type="number" step="0.01" value="1467.28"
+                  class="w-full rounded-md border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-pln-blue" />
+                <button id="use-default-tariff" type="button" class="px-3 py-2 rounded-md bg-pln-blue text-white hover:opacity-95">Default</button>
+              </div>
+              <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Contoh: Rp 1.467,28 → masukkan 1467.28</p>
+            </div>
+
+            <div class="flex items-center gap-3">
+              <button id="calculate-btn" type="submit" class="flex-1 inline-flex items-center justify-center gap-2 px-4 py-2 bg-pln-blue text-white rounded-md shadow hover:brightness-95">
+                <svg class="lucide-icon w-4 h-4" data-feather="zap"></svg>
+                Hitung Token
+              </button>
+
+              <button id="reset-btn" type="button" class="px-4 py-2 border border-gray-200 dark:border-gray-700 rounded-md hover:bg-gray-50 dark:hover:bg-gray-700">
+                Reset
+              </button>
+            </div>
+
+            <div class="flex items-center gap-2">
+              <input id="enable-compare" type="checkbox" class="h-4 w-4" />
+              <label for="enable-compare" class="text-sm">Tampilkan simulasi perbandingan antar daya (bonus)</label>
+            </div>
+          </form>
+        </div>
+
+        <!-- Result (col 2) -->
+        <div id="result-card" class="col-span-1 opacity-0 translate-y-4 pointer-events-none transition-all duration-350" aria-live="polite">
+          <div class="bg-white dark:bg-gray-800 rounded-xl shadow-md border border-gray-100 dark:border-gray-700 p-6">
+            <div class="flex items-center gap-3 mb-4">
+              <svg class="lucide-icon w-6 h-6 text-pln-yellow" data-feather="info"></svg>
+              <h3 class="text-lg font-semibold">Hasil Perhitungan</h3>
+            </div>
+
+            <div id="summary" class="space-y-3">
+              <div class="flex justify-between">
+                <span class="text-sm text-gray-600 dark:text-gray-300">Nomor Meteran</span>
+                <span id="out-meter" class="font-medium"></span>
+              </div>
+
+              <div class="flex justify-between">
+                <span class="text-sm text-gray-600 dark:text-gray-300">Nominal Pembelian</span>
+                <span id="out-nominal" class="font-medium"></span>
+              </div>
+
+              <div class="flex justify-between">
+                <span class="text-sm text-gray-600 dark:text-gray-300">Biaya Admin (6%)</span>
+                <span id="out-admin" class="font-medium"></span>
+              </div>
+
+              <div class="flex justify-between">
+                <span class="text-sm text-gray-600 dark:text-gray-300">Harga Dasar Token (setelah potongan 6%)</span>
+                <span id="out-base" class="font-medium"></span>
+              </div>
+
+              <div class="flex justify-between">
+                <span class="text-sm text-gray-600 dark:text-gray-300">Tarif yang dipakai (Rp/kWh)</span>
+                <span id="out-tariff" class="font-medium"></span>
+              </div>
+
+              <div class="flex justify-between items-end">
+                <div>
+                  <span class="text-sm text-gray-600 dark:text-gray-300">Daya (kWh)</span>
+                  <p id="out-kwh" class="text-2xl font-semibold mt-0.5"></p>
+                </div>
+                <div class="text-right">
+                  <span class="text-sm text-gray-600 dark:text-gray-300">Total Dibayar</span>
+                  <p id="out-total" class="text-2xl font-semibold mt-0.5 text-pln-blue"></p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Comparison table (bonus) -->
+            <div id="compare-section" class="mt-6 hidden">
+              <h4 class="font-semibold mb-3">Simulasi Perbandingan Daya</h4>
+              <div class="overflow-x-auto">
+                <table class="min-w-full text-left text-sm">
+                  <thead>
+                    <tr class="text-gray-500 dark:text-gray-300">
+                      <th class="px-3 py-2">Daya (VA)</th>
+                      <th class="px-3 py-2">Tarif (Rp/kWh)</th>
+                      <th class="px-3 py-2">kWh yang didapat</th>
+                    </tr>
+                  </thead>
+                  <tbody id="compare-table-body" class="divide-y divide-gray-100 dark:divide-gray-700"></tbody>
+                </table>
+              </div>
+              <p class="text-xs text-gray-500 dark:text-gray-400 mt-3">Catatan: tarif di tabel adalah contoh simulasi; sesuaikan tarif aktual jika diperlukan.</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Receipt / Struk (col 3) -->
+        <aside id="receipt-card" class="col-span-1 opacity-0 translate-y-4 pointer-events-none transition-all duration-350">
+          <div class="bg-white dark:bg-gray-900 rounded-xl shadow-md border border-gray-100 dark:border-gray-700 p-6 receipt">
+            <div class="flex items-center justify-between mb-4">
+              <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-md bg-pln-blue text-white flex items-center justify-center">
+                  <svg class="lucide-icon w-5 h-5" data-feather="zap"></svg>
+                </div>
+                <div>
+                  <h4 class="text-lg font-semibold">STRUK TOKEN PLN</h4>
+                  <p class="text-xs text-gray-500 dark:text-gray-400">Transaksi Elektronik</p>
+                </div>
+              </div>
+              <div class="flex items-center gap-2">
+                <button id="copy-receipt" class="p-2 rounded-md hover:bg-gray-100 dark:hover:bg-gray-800" title="Salin struk">
+                  <svg class="lucide-icon w-4 h-4" data-feather="copy"></svg>
+                </button>
+                <button id="print-receipt" class="p-2 rounded-md hover:bg-gray-100 dark:hover:bg-gray-800" title="Cetak struk">
+                  <svg class="lucide-icon w-4 h-4" data-feather="printer"></svg>
+                </button>
+              </div>
+            </div>
+
+            <div class="text-xs text-gray-600 dark:text-gray-300 mb-3">
+              <div class="flex justify-between"><span>Nomor Meteran</span><span id="r_meter" class="font-medium"></span></div>
+              <div class="flex justify-between"><span>Nominal</span><span id="r_nominal" class="font-medium"></span></div>
+              <div class="flex justify-between"><span>Biaya Admin</span><span id="r_admin" class="font-medium"></span></div>
+              <div class="flex justify-between"><span>Harga Dasar</span><span id="r_base" class="font-medium"></span></div>
+              <div class="flex justify-between"><span>Tarif (Rp/kWh)</span><span id="r_tariff" class="font-medium"></span></div>
+              <div class="flex justify-between mt-2"><span>Daya (kWh)</span><span id="r_kwh" class="font-medium"></span></div>
+              <div class="flex justify-between mt-3">
+                <span class="text-sm font-medium">Total Dibayar</span>
+                <span id="r_total" class="text-sm font-semibold text-pln-blue"></span>
+              </div>
+              <hr class="my-3 border-dashed border-gray-200 dark:border-gray-700" />
+              <div class="flex justify-between text-xs text-gray-500">
+                <span id="r_time"></span>
+                <span id="r_txid" class="font-mono"></span>
+              </div>
+            </div>
+
+            <div class="pt-3 border-t border-gray-100 dark:border-gray-700">
+              <p class="text-xs text-gray-500 dark:text-gray-400">Terima kasih — PLN</p>
+            </div>
+          </div>
+        </aside>
+      </div>
+    </section>
+  </main>
+
+  <footer class="border-t border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800">
+    <div class="max-w-7xl mx-auto px-4 py-6 flex items-center justify-between text-sm text-gray-600 dark:text-gray-300">
+      <div>Kalkulator Token Listrik © 2025</div>
+      <div class="flex items-center gap-3">
+        <span class="text-xs">Tema PLN</span>
+        <span class="inline-block w-4 h-4 bg-pln-blue rounded-sm"></span>
+        <span class="inline-block w-4 h-4 bg-pln-yellow rounded-sm"></span>
+      </div>
+    </div>
+  </footer>
+
+  <script src="script.js"></script>
+  <script>lucide.createIcons()</script>
+</body>
+</html>
