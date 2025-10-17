@@ -1,0 +1,66 @@
+/* style.css - tambahan gaya untuk struk dan animasi */
+
+/* Fade & slide in for result and receipt (we toggle classes in JS) */
+#result-card.opacity-0, #receipt-card.opacity-0 {
+  opacity: 0;
+  transform: translateY(12px);
+  pointer-events: none;
+}
+#result-card.opacity-100, #receipt-card.opacity-100 {
+  opacity: 1;
+  transform: translateY(0);
+  pointer-events: auto;
+  transition: opacity 360ms cubic-bezier(.2,.9,.3,1), transform 360ms cubic-bezier(.2,.9,.3,1);
+}
+
+/* Receipt specific styling */
+.receipt {
+  font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+  line-height: 1.2;
+  color: inherit;
+}
+.receipt .lucide-icon { color: inherit; }
+
+/* Print styles: only print the receipt card */
+@media print {
+  body * { visibility: hidden !important; opacity: 0 !important; }
+  #receipt-card, #receipt-card * {
+    visibility: visible !important;
+    opacity: 1 !important;
+  }
+  #receipt-card {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+  }
+}
+
+/* Focus and small tweaks */
+input:focus, select:focus, button:focus, textarea:focus {
+  outline: none;
+  box-shadow: 0 0 0 4px rgba(0,50,119,0.08);
+}
+
+/* Tiny responsive tweak for small screens */
+@media (max-width: 640px) {
+  #out-kwh, #out-total { font-size: 1.5rem; }
+}
+
+/* Dark-mode transition */
+html.dark body {
+  transition: background-color 200ms ease, color 200ms ease;
+}
+
+/* Make lucide icons inherit color */
+.lucide-icon { color: inherit; }
+
+/* Table padding helper */
+table tbody tr td, table thead tr th {
+  padding: 0.5rem 0.75rem;
+}
+
+/* Small helper: dashed hr in receipt */
+.receipt hr {
+  border-style: dashed;
+}
